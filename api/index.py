@@ -14,7 +14,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Hello World_test"}
 
 # 추가 라우트
 @app.get("/api/items")
