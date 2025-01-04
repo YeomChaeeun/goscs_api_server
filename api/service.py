@@ -1,6 +1,7 @@
-from crawler import NaverNewsCrawler
 from datetime import datetime
-from util import encode_euc_kr
+
+from .crawler import NaverNewsCrawler
+from .util import encode_euc_kr
 
 def get_news(item_name:str, item_count:int = 5):
   NAVER_SOURCE_URL="https://finance.naver.com/news/news_search.naver?rcdate=&q={item}&x=0&y=0&sm=all.basic&pd=1&stDateStart=1997-01-01&stDateEnd={stDateEnd}"
