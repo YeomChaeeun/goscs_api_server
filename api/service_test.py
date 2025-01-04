@@ -11,8 +11,8 @@ class TestSevice(unittest.TestCase):
   #def test_get_graph(self):
     #service.get_graph(['229200', '0000J0'], service.Duration.M1)
 
-  def test_get_industry_marcap_pie(self):
-    service.get_industry_marcap_pie()
+  def test_get_stock_list(self):
+    service.get_stock_list()
 
     
 if __name__ == "__main__":

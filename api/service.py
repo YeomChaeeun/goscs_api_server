@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import matplotlib.pyplot as plt
+#import matplotlib.ticker as mtick
 from enum import Enum
 import FinanceDataReader as fdr
 
@@ -50,3 +51,21 @@ def get_adjusted_close_graph(item_code:list[str], duration_str:str = None):
 
   return filename
 
+
+def get_rate_of_return_graph(item_code:str, from_date:str="20190101", to_date:str="20241231"):
+  df = fdr.DataReader(item_code, from_date, to_date)
+  df['Ret'] = df.Close / df.Close[0] -1
+
+  #ax = (df.Ret * 100).plot()
+  #ax.yaxis.set_major_formatter(mtick.PercentFormatter())
+  plt.title(f'RoR of {item_code}')
+  
+  filename = "rate_of_return/"+item_code+'_'+from_date+"_"+to_date+".png"
+  plt.savefig(fname = filename)
+
+  return filename
+
+
+def get_stock_list(market:str = 'S&P500'):
+  df = fdr.StockListing(market)
+  return df.to_dict('records')
