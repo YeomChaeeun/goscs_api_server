@@ -1,5 +1,9 @@
 from fastapi import FastAPI
+import uvicorn
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+import service
 
 app = FastAPI()
 
@@ -12,13 +16,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
 
-# 추가 라우트
-@app.get("/api/items")
-async def get_items():
-    return {"items": ["item1", "item2"]}
+@app.get("/",include_in_schema=False)
+async def docs_redirect():
+    return RedirectResponse(url = "/docs", status_code = 302)
 
-# Vercel은 ASGI 애플리케이션을 위해 app 객체를 찾습니다
+
+@app.get("/api/news")
+async def get_news(item_name:str, item_count:int = 5):
+    news_result = service.get_news(item_name, item_count)
+    
+    return news_result
+
+
+if __name__ == "__main__":
+    uvicorn.run(app)
