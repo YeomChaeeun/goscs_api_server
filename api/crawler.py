@@ -3,7 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import pandas as pd
+from urllib.parse import parse_qs, urlparse
 from datetime import datetime
+import re
 
 class WebCrawler:
 
@@ -122,14 +124,8 @@ class NaverNewsCrawler(WebCrawler):
   def get_news_list(self, url, count):
     data = []
     page = 1
-    print("**count")
-    print(count)
     while len(data)< count:
-      print("**data lenght")
-      print(len(data))
       parsing = self._news_page_parsing(url, page)
-      print("**parsing")
-      print(parsing)
       if not parsing:
           return data
       data.extend(parsing)
@@ -142,6 +138,7 @@ class NaverNewsCrawler(WebCrawler):
     soup = self.get_soup(url + f'&page={page}')
     if not soup:
         return []
+    print(soup)
     try:
       result = soup.find_all('dl', class_="newsList")[0]
       subject_list = result.find_all(class_ = "articleSubject")
@@ -152,12 +149,19 @@ class NaverNewsCrawler(WebCrawler):
 
       data = []
       for subject, summary in zip(subject_list, summary_list):
+          url = subject.a.get('href')
+          if not url.startswith("https://"):
+            query_params = parse_qs(urlparse(url).query)
+            article_id = query_params['article_id'][0]
+            office_id = query_params['office_id'][0]
+            url = f"https://n.news.naver.com/mnews/article/{office_id}/{article_id}";
           article = {
-              'url':subject.a.get('href'),
+              'url':url,
               'title': subject.text.strip(),
               'summary':summary.text.strip().replace('\t',''),
               'wdate':summary.find('span', class_="wdate").text.strip().replace('\t','')
           }
+          print(article)
           data.append(article)
 
       

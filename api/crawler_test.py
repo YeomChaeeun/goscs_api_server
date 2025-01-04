@@ -36,12 +36,12 @@ class TestWebCrawler(unittest.TestCase):
   
   def test_news_page_parsing(self):
     print("****news page parsing****")
-    item_name = "엔비디아kekekek"
+    item_name = "엔비디아"
     NAVER_SOURCE_URL="https://finance.naver.com/news/news_search.naver?rcdate=&q={item}&x=0&y=0&sm=all.basic&pd=1&stDateStart=1997-01-01&stDateEnd={stDateEnd}"
     url = NAVER_SOURCE_URL.format(item = encode_euc_kr(item_name), stDateEnd = datetime.now().strftime("%Y-%m-%d"))
     
     _naver_news_crawler = NaverNewsCrawler()
-    _naver_news_crawler._news_page_parsing(url, page = 1000000)
+    _naver_news_crawler._news_page_parsing(url)
 
     
 if __name__ == "__main__":
