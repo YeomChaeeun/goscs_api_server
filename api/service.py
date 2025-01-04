@@ -1,11 +1,8 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import pandas as pd
 import matplotlib.pyplot as plt
 from enum import Enum
 import FinanceDataReader as fdr
-import requests as rq
-from io import StringIO
 
 from .crawler import NaverNewsCrawler
 from .util import encode_euc_kr
@@ -53,56 +50,3 @@ def get_adjusted_close_graph(item_code:list[str], duration_str:str = None):
 
   return filename
 
-
-def get_industry_marcap_pie(duration:Duration=Duration.Y1):
-  yesterday = datetime.now() - timedelta(days=1)
-  
-  df = download_krx_sector(yesterday.strftime('%Y%m%d'))
-  marcap_df = df.groupby(by = '업종명')['시가총액'].sum().reset_index(name = 'Marcap').sort_values(by = 'Marcap').set_index('업종명')
-  
-  wedgeprops = {'width': 0.8, 'edgecolor': 'w', 'linewidth': 2}
-  marcap_df.plot.pie(y = 'Marcap', autopct = '%1.1f%%',
-                   wedgeprops = wedgeprops, pctdistance = 0.8,
-                   figsize = (10, 10), ylabel = '', legend = False)
-  filename = "industry_marcap_pie/pie{}".format(yesterday.strftime("%Y%m%d"))
-  plt.savefig(fname = filename)
-
-  return filename
-
-def get_krx_otp(otp_params, headers):
-  krx_gen_otp_url = 'http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd'
-
-  krx_otp = rq.post(krx_gen_otp_url, otp_params, headers = headers).text
-  return krx_otp
-
-def download_krx_sector(at_date, market = None):
-  if not market:
-    kospi_df = download_krx_sector(at_date, 'KOSPI')
-    kosdaq_df = download_krx_sector(at_date, 'KOSDAQ')
-    return pd.concat([kospi_df, kosdaq_df])
-
-  headers = { 'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201010101&idxIndMidclssCd=02&money=1' }
-  otp_params = {
-      'locale': 'ko_KR',
-      'trdDd': at_date,
-      'share':'2',
-      'money': '1',
-      'csvxls_isNo': 'false',
-      'name': 'fileDown',
-      'url': 'dbms/MDC/STAT/standard/MDCSTAT00101'
-  }
-  if market == 'KOSPI':
-    otp_params |= { 'idxIndMidclssCd': '02' }
-  elif market == 'KOSDAQ':
-    otp_params |= { 'idxIndMidclssCd': '03' }
-
-  otp = get_krx_otp(otp_params, headers)
-
-  download_url = 'http://data.krx.co.kr/comm/fileDn/download_csv/download.cmd'
-  download_params = {
-      'code': otp
-  }
-  res = rq.post(download_url, download_params, headers = headers)
-
-  res.encoding = 'euc-kr'
-  return pd.read_csv(StringIO(res.text))
